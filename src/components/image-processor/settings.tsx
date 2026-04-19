@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { 
   Settings2, Zap, Type, Sun, Contrast, Droplets, FileType,
   Shield, Maximize, Move, Eye, Download, Square, FileEdit,
-  Palette, ImageIcon, Layers, RefreshCcw
+  Palette, ImageIcon, Layers, RefreshCcw, X
 } from 'lucide-react';
 import {
   Accordion,
@@ -69,6 +69,9 @@ export const ConversionSettings: React.FC<SettingsProps> = ({
     }
   };
 
+  // Helper to extract slider value safely
+  const getSliderValue = (v: number | readonly number[]) => Array.isArray(v) ? v[0] : v;
+
   return (
     <Card className="shadow-2xl border-primary/10 overflow-hidden bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl">
       <CardHeader className="bg-primary/5 pb-4 flex flex-row items-center justify-between">
@@ -81,7 +84,7 @@ export const ConversionSettings: React.FC<SettingsProps> = ({
         </Button>
       </CardHeader>
       <CardContent className="p-0">
-        <Accordion className="w-full" type="multiple" defaultValue={["basic"]}>
+        <Accordion className="w-full" multiple defaultValue={["basic"]}>
           
           <AccordionItem value="basic" className="px-6 border-b">
             <AccordionTrigger className="hover:no-underline py-4 font-bold">基本・フォーマット</AccordionTrigger>
@@ -91,11 +94,11 @@ export const ConversionSettings: React.FC<SettingsProps> = ({
                   <Label className="text-sm font-medium">画質 / 圧縮率</Label>
                   <span className="text-primary font-bold">{settings.quality}%</span>
                 </div>
-                <Slider value={[settings.quality]} max={100} onValueChange={(v) => updateSettings('quality', v[0])} />
+                <Slider value={[settings.quality]} max={100} onValueChange={(v) => updateSettings('quality', getSliderValue(v))} />
               </div>
               <div className="space-y-4">
                 <Label className="text-sm font-medium flex items-center gap-2"><FileType className="w-4 h-4" /> 出力形式</Label>
-                <ToggleGroup type="single" value={settings.format} onValueChange={(v) => v && updateSettings('format', v)} className="grid grid-cols-2 gap-2">
+                <ToggleGroup value={[settings.format]} onValueChange={(v: any) => v && updateSettings('format', Array.isArray(v) ? v[0] : v)} className="grid grid-cols-2 gap-2">
                   <ToggleGroupItem value="image/webp" className="w-full">WebP</ToggleGroupItem>
                   <ToggleGroupItem value="image/avif" className="w-full">AVIF</ToggleGroupItem>
                   <ToggleGroupItem value="image/jpeg" className="w-full">JPEG</ToggleGroupItem>
@@ -124,7 +127,7 @@ export const ConversionSettings: React.FC<SettingsProps> = ({
               {settings.aspectRatio !== 'original' && (
                 <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
                   <Label className="text-sm font-medium flex items-center gap-2"><Layers className="w-4 h-4" /> 余白の埋め方</Label>
-                  <ToggleGroup type="single" value={settings.backgroundMode} onValueChange={(v) => v && updateSettings('backgroundMode', v)} className="flex gap-2">
+                  <ToggleGroup value={[settings.backgroundMode]} onValueChange={(v: any) => v && updateSettings('backgroundMode', Array.isArray(v) ? v[0] : v)} className="flex gap-2">
                     <ToggleGroupItem value="blur" className="flex-1">ぼかし背景</ToggleGroupItem>
                     <ToggleGroupItem value="color" className="flex-1">単色</ToggleGroupItem>
                   </ToggleGroup>
@@ -154,7 +157,7 @@ export const ConversionSettings: React.FC<SettingsProps> = ({
                     <Label className="text-sm font-medium text-foreground flex items-center gap-2">{item.icon} {item.label}</Label>
                     <span>{(settings as any)[item.key]}{item.unit}</span>
                   </div>
-                  <Slider value={[(settings as any)[item.key]]} max={item.max} onValueChange={(v) => updateSettings(item.key, v[0])} />
+                  <Slider value={[ (settings as any)[item.key] ]} max={item.max} onValueChange={(v) => updateSettings(item.key, getSliderValue(v))} />
                 </div>
               ))}
               <div className="flex items-center justify-between">
@@ -209,7 +212,7 @@ export const ConversionSettings: React.FC<SettingsProps> = ({
                 </div>
                 <div className="space-y-3">
                   <Label className="text-xs text-muted-foreground"><Eye className="w-3 h-3 inline mr-1" /> 不透明度</Label>
-                  <Slider value={[settings.watermarkOpacity]} max={100} onValueChange={(v) => updateSettings('watermarkOpacity', v[0])} />
+                  <Slider value={[settings.watermarkOpacity]} max={100} onValueChange={(v) => updateSettings('watermarkOpacity', getSliderValue(v))} />
                 </div>
               </div>
             </AccordionContent>
