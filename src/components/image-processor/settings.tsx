@@ -6,7 +6,7 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { 
+import {
   Settings2, Zap, Type, Sun, Contrast, Droplets, FileType,
   Shield, Maximize, Move, Eye, Download, Square, FileEdit,
   Palette, ImageIcon, Layers, RefreshCcw, X, Info, CheckCircle2
@@ -76,17 +76,17 @@ export const ConversionSettings: React.FC<SettingsProps> = ({
       <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent pb-4 flex flex-row items-center justify-between border-b border-primary/5">
         <CardTitle className="text-lg flex items-center gap-2 font-bold">
           <Settings2 className="w-5 h-5 text-primary" />
-          使い方の設定
+          加工の設定
         </CardTitle>
         <Button variant="ghost" size="sm" onClick={onReset} className="h-8 text-[10px] gap-1.5 text-muted-foreground hover:text-primary transition-colors">
           <RefreshCcw className="w-3 h-3" />
           リセット
         </Button>
       </CardHeader>
-      
+
       <CardContent className="p-0">
         <Accordion className="w-full" multiple defaultValue={["basic"]}>
-          
+
           {/* 保存形式の設定 */}
           <AccordionItem value="basic" className="px-5 border-b border-muted/50">
             <AccordionTrigger className="hover:no-underline py-5">
@@ -111,7 +111,7 @@ export const ConversionSettings: React.FC<SettingsProps> = ({
                   <Info className="w-3 h-3" /> 80%前後がおすすめのバランスです
                 </p>
               </div>
-              
+
               <div className="space-y-3">
                 <Label className="text-xs font-bold text-zinc-600 dark:text-zinc-400">データの種類</Label>
                 <ToggleGroup value={[settings.format]} onValueChange={(v: any) => v && updateSettings('format', Array.isArray(v) ? v[0] : v)} className="grid grid-cols-2 gap-2">
@@ -197,7 +197,7 @@ export const ConversionSettings: React.FC<SettingsProps> = ({
                     <Label className="flex items-center gap-1.5">{item.icon} {item.label}</Label>
                     <span className="text-muted-foreground">{(settings as any)[item.key]}{item.unit}</span>
                   </div>
-                  <Slider value={[ (settings as any)[item.key] ]} max={item.max} onValueChange={(v) => updateSettings(item.key, getSliderValue(v))} />
+                  <Slider value={[(settings as any)[item.key]]} max={item.max} onValueChange={(v) => updateSettings(item.key, getSliderValue(v))} />
                 </div>
               ))}
               <div className="flex items-center justify-between pt-2 border-t border-dashed">
@@ -221,7 +221,7 @@ export const ConversionSettings: React.FC<SettingsProps> = ({
               </div>
             </AccordionTrigger>
             <AccordionContent className="pb-6 space-y-6">
-               <div className="space-y-3">
+              <div className="space-y-3">
                 <Label className="text-xs font-bold text-zinc-600">ロゴ画像（PNG等）</Label>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" className="flex-1 h-10 gap-2 rounded-xl text-xs overflow-hidden relative" onClick={() => logoInputRef.current?.click()}>
@@ -241,7 +241,7 @@ export const ConversionSettings: React.FC<SettingsProps> = ({
                 <Label className="text-xs font-bold text-zinc-600">表示したい文字</Label>
                 <Input value={settings.watermarkText} onChange={(e) => updateSettings('watermarkText', e.target.value)} placeholder="例：© 自分の名前" className="bg-muted/20" />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-[10px] font-bold text-muted-foreground">置く場所</Label>
