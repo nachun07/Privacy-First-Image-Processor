@@ -85,7 +85,7 @@ export const ConversionSettings: React.FC<SettingsProps> = ({
       </CardHeader>
 
       <CardContent className="p-0">
-        <Accordion className="w-full" multiple defaultValue={["basic"]}>
+        <Accordion className="w-full" defaultValue={["basic"]}>
 
           {/* 保存形式の設定 */}
           <AccordionItem value="basic" className="px-5 border-b border-muted/50">
