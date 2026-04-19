@@ -59,6 +59,8 @@ export default function Home() {
   // リアルタイムプレビュー生成
   useEffect(() => {
     if (images.length === 0) {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      if (previewOriginalUrl) URL.revokeObjectURL(previewOriginalUrl);
       setPreviewUrl(null);
       setPreviewOriginalUrl(null);
       return;
@@ -66,11 +68,14 @@ export default function Home() {
 
     const generatePreview = async () => {
       const firstImage = images[0];
-      setPreviewOriginalUrl(firstImage.preview);
+      if (!previewOriginalUrl) {
+        setPreviewOriginalUrl(URL.createObjectURL(firstImage.file));
+      }
+      
       try {
         // プレビュー用なのでサイズを少し抑えて高速化
         const previewSettings = { ...settings, maxWidth: 800 }; 
-        const result = await processImageWithCanvas(firstImage.file, previewSettings);
+        const result = await processImageWithCanvas(firstImage.file, previewSettings, 0);
         if (previewUrl) URL.revokeObjectURL(previewUrl);
         setPreviewUrl(URL.createObjectURL(result));
       } catch (err) {
@@ -84,7 +89,7 @@ export default function Home() {
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
-  }, [settings, images.length]); // 画像が追加されたか設定が変わったら実行
+  }, [settings, images.length]);
 
   const updateSetting = (key: string, value: any) => {
     setSettings(prev => ({ ...prev, [key]: value }));
@@ -320,11 +325,15 @@ export default function Home() {
               </motion.section>
             )}
 
-            <section>
+            <section className="space-y-6">
+              <div className="flex items-center gap-3 px-2">
+                <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+                <h2 className="text-sm font-bold tracking-widest uppercase text-primary/50">Drop & Convert</h2>
+                <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+              </div>
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
               >
                 <DropZone onFilesAdded={handleFilesAdded} />
               </motion.div>
@@ -384,10 +393,10 @@ export default function Home() {
               >
                 <Download className="w-5 h-5" /> ZIPで一括保存
               </Button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
 
       <footer className="border-t py-12 bg-muted/10">
         <div className="max-w-6xl mx-auto px-6 text-center">
