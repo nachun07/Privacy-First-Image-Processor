@@ -360,6 +360,50 @@ export default function Home() {
                 </div>
               )}
             </section>
+
+            {/* SEO Content Section to fix Soft 404 */}
+            <section className="pt-20 space-y-16 border-t border-dashed border-muted">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">プライバシーを第一に考えた画像処理</h2>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Privacy Image Processorは、機密性の高い画像を扱うプロフェッショナルのために開発されました。
+                    一般的なオンラインコンバーターとは異なり、あなたの画像は一瞬たりともサーバーに送信されることはありません。
+                    すべてのピクセル操作は、あなたのブラウザ内（クライアントサイド）メモリ上でのみ実行されます。
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">次世代フォーマット WebP / AVIF 対応</h2>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    最新の圧縮アルゴリズムを活用し、画質を維持したままファイルサイズを劇的に軽量化します。
+                    AVIF形式への一括変換もサポートしており、Webサイトの高速化（PageSpeed Insightsの改善）に大きく貢献します。
+                    オフラインでも動作する設計により、場所を選ばず安全に作業が可能です。
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-primary/5 rounded-3xl p-8 md:p-12 border border-primary/10">
+                <h2 className="text-xl font-bold mb-6 text-center">プロ仕様の編集機能を一括適用</h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                  <div>
+                    <div className="font-bold text-primary text-xl mb-1">連番</div>
+                    <div className="text-[10px] text-muted-foreground">一括リネーム</div>
+                  </div>
+                  <div>
+                    <div className="font-bold text-primary text-xl mb-1">合成</div>
+                    <div className="text-[10px] text-muted-foreground">ロゴ・文字入れ</div>
+                  </div>
+                  <div>
+                    <div className="font-bold text-primary text-xl mb-1">角丸</div>
+                    <div className="text-[10px] text-muted-foreground">SNS最適化</div>
+                  </div>
+                  <div>
+                    <div className="font-bold text-primary text-xl mb-1">0%</div>
+                    <div className="text-[10px] text-muted-foreground">サーバー通信なし</div>
+                  </div>
+                </div>
+              </div>
+            </section>
           </div>
 
           {/* Sidebar */}
