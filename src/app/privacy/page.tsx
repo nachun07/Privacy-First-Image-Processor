@@ -39,6 +39,7 @@ export default function PrivacyPolicy() {
               <h2 className="text-xl font-bold text-zinc-900">3. 運営と費用について</h2>
               <p>
                 本サービスは完全無料で提供されており、広告の掲載やユーザーデータの販売による収益化は一切行っておりません。
+                また、本サービスにおいてCookieによる追跡や情報の収集を行うこともありません。
                 サーバー代がかからないサーバーレス構成により、非営利での永続的な提供を目指しています。
               </p>
             </section>
