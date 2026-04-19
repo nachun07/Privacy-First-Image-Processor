@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: '/private/',
     },
-    sitemap: 'https://privacy-image-processor.vercel.app/sitemap.xml',
+    sitemap: 'https://privacy-first-image-processor.vercel.app/sitemap.xml',
   }
 }
