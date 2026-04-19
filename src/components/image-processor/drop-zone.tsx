@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useCallback, useState } from 'react';
-import { Upload, Image as ImageIcon, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Upload, Image as ImageIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface DropZoneProps {
@@ -46,49 +46,49 @@ export const DropZone: React.FC<DropZoneProps> = ({ onFilesAdded, className }) =
     }
   }, [onFilesAdded]);
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      document.getElementById('file-upload')?.click();
+    }
+  };
+
   return (
-    <div
-      className={cn(
-        "relative group cursor-pointer",
-        className
-      )}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      onClick={() => document.getElementById('file-upload')?.click()}
-    >
-      <input
-        id="file-upload"
-        type="file"
-        multiple
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileInput}
-      />
-      
-      <motion.div
-        animate={{
-          borderColor: isDragging ? "var(--primary)" : "rgba(0,0,0,0.1)",
-          backgroundColor: isDragging ? "rgba(96, 165, 250, 0.05)" : "rgba(0,0,0,0)",
-          scale: isDragging ? 1.02 : 1
-        }}
+    <div className={cn("relative group", className)}>
+      <label
+        htmlFor="file-upload"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         className={cn(
-          "h-64 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all duration-300",
-          "hover:border-primary/50 hover:bg-muted/30"
+          "relative h-64 border-3 border-dashed rounded-[2rem] flex flex-col items-center justify-center transition-all duration-500 cursor-pointer outline-none focus-visible:ring-4 focus-visible:ring-primary/20 focus-visible:border-primary",
+          isDragging ? "border-primary bg-primary/5 scale-[1.01]" : "border-muted-foreground/20 bg-background hover:border-primary/40 hover:bg-muted/30"
         )}
+        aria-label="画像をアップロード。ファイルをここにドラッグ＆ドロップするか、エンターキーを押してファイルを選択してください。"
       >
-        <div className="bg-primary/10 p-4 rounded-full mb-4 group-hover:scale-110 transition-transform duration-300">
-          <Upload className="w-8 h-8 text-primary" />
-        </div>
-        <h3 className="text-xl font-semibold mb-2">画像をドラッグ＆ドロップ</h3>
-        <p className="text-muted-foreground text-sm mb-6">またはクリックしてファイルを選択</p>
+        <input
+          id="file-upload"
+          type="file"
+          multiple
+          accept="image/*"
+          className="sr-only"
+          onChange={handleFileInput}
+        />
         
-        <div className="flex gap-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><ImageIcon className="w-3 h-3" /> JPG, PNG, WebP</span>
-          <span>•</span>
-          <span>複数追加可能</span>
+        <div className="bg-primary/10 p-5 rounded-full mb-6 group-hover:scale-110 group-focus-visible:scale-110 transition-transform duration-500 ease-out">
+          <Upload className={cn("w-10 h-10 transition-colors", isDragging ? "text-primary" : "text-primary/60")} />
         </div>
-      </motion.div>
+        
+        <h3 className="text-xl font-black mb-3 tracking-tight">画像をドラッグ＆ドロップ</h3>
+        <p className="text-muted-foreground text-sm mb-8 font-medium">またはクリック・Enterキーで選択</p>
+        
+        <div className="flex items-center gap-6 text-xs font-bold text-muted-foreground/60">
+          <span className="flex items-center gap-2 bg-muted px-3 py-1.5 rounded-full"><ImageIcon className="w-3.5 h-3.5" /> JPG / PNG / WebP</span>
+          <span className="flex items-center gap-2 bg-muted px-3 py-1.5 rounded-full text-primary/80">一括処理対応</span>
+        </div>
+      </label>
     </div>
   );
 };

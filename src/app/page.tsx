@@ -7,8 +7,8 @@ import { ImageList, ImageItem } from '@/components/image-processor/image-list';
 import { processImageWithCanvas, ProcessingSettings } from '@/lib/image-processor';
 import { Button } from '@/components/ui/button';
 import { 
-  Download, Play, Trash2, ShieldCheck, Moon, Sun, X, BarChart3,
-  ExternalLink, Code, ChevronLeft, ChevronRight
+  Download, Play, Trash2, ShieldCheck, Moon, Sun, 
+  BarChart3, ChevronLeft, ChevronRight 
 } from 'lucide-react';
 import { toast } from 'sonner';
 import JSZip from 'jszip';
@@ -57,8 +57,7 @@ export default function Home() {
       if (img.result) processedTotal += img.result.size;
     });
     const saved = originalTotal - processedTotal;
-    const savingRate = originalTotal > 0 ? (saved / originalTotal) * 100 : 0;
-    return { originalTotal, processedTotal, saved, savingRate };
+    return { originalTotal, processedTotal, saved };
   }, [images]);
 
   // リアルタイムプレビュー生成
@@ -210,139 +209,205 @@ export default function Home() {
     <main className={`min-h-screen ${isDarkMode ? 'dark bg-zinc-950 text-zinc-100' : 'bg-[#fafafa] text-zinc-900'} transition-colors duration-300`}>
       {/* Navigation */}
       <nav className="border-b bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="bg-primary p-1.5 md:p-2 rounded-xl">
-              <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 text-white" />
+        <div className="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-primary p-2 rounded-xl" aria-hidden="true">
+              <ShieldCheck className="w-6 h-6 text-white" />
             </div>
-            <span className="font-bold text-base md:text-xl tracking-tight">Privacy Image</span>
+            <span className="font-black text-xl tracking-tighter">Privacy Image</span>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
+            <Link href="/guide" className="hidden sm:flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-primary transition-colors px-3 py-2 rounded-xl hover:bg-primary/5">
+              <BarChart3 className="w-4 h-4" />
+              <span>使い方ガイド</span>
+            </Link>
             {stats.originalTotal > 0 && (
-              <div className="hidden md:flex items-center gap-2 text-xs font-mono">
-                <span className="text-primary font-bold">{(stats.saved / 1024 / 1024).toFixed(1)}MB saved</span>
+              <div className="hidden md:flex items-center gap-2 text-sm font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-full">
+                <BarChart3 className="w-4 h-4" />
+                <span>{(stats.saved / 1024 / 1024).toFixed(1)}MB 軽量化済み</span>
               </div>
             )}
-            <Button variant="ghost" size="icon" onClick={() => setIsDarkMode(!isDarkMode)} className="rounded-full w-9 h-9">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setIsDarkMode(!isDarkMode)} 
+              className="rounded-full w-10 h-10"
+              aria-label={isDarkMode ? "ライトモードに切り替え" : "ダークモードに切り替え"}
+            >
               {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </Button>
           </div>
         </div>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-14">
           
           {/* Main Area */}
-          <div className="lg:col-span-8 space-y-8 md:space-y-10">
+          <div className="lg:col-span-8 space-y-10 md:space-y-12">
             {previewUrl && (
-              <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-                  <h2 className="text-xl font-bold tracking-tight px-2">ライブプレビュー</h2>
-                  <div className="flex gap-2 w-full sm:w-auto px-2">
-                    <Button variant="outline" size="sm" onClick={loadPreset} className="flex-1 h-8 text-xs">復元</Button>
-                    <Button variant="outline" size="sm" onClick={savePreset} className="flex-1 h-8 text-xs text-primary bg-primary/5 border-primary/20">保存</Button>
+              <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 px-2">
+                  <div>
+                    <h2 className="text-xl md:text-2xl font-bold tracking-tight">ライブプレビュー</h2>
+                    <p className="text-muted-foreground text-sm font-medium">中央のバーを動かして加工前後を比較できます</p>
+                  </div>
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    <Button variant="outline" size="sm" onClick={loadPreset} className="flex-1 h-9 text-xs font-bold shadow-sm">
+                      前回の設定を復元
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={savePreset} className="flex-1 h-9 text-xs font-bold text-primary bg-primary/5 border-primary/20 shadow-sm">
+                      今の設定を保存
+                    </Button>
                   </div>
                 </div>
                 
-                <div className="relative aspect-video rounded-2xl md:rounded-3xl overflow-hidden border-2 md:border-4 border-white dark:border-zinc-800 shadow-xl bg-muted/40">
-                  <img src={previewOriginalUrl || ''} className="absolute inset-0 w-full h-full object-contain" alt="Original" />
+                <div className="relative aspect-video rounded-[2rem] overflow-hidden border-4 border-white dark:border-zinc-800 shadow-2xl shadow-primary/5 bg-muted/40">
+                  <img src={previewOriginalUrl || ''} className="absolute inset-0 w-full h-full object-contain" alt="加工前" />
                   <div className="absolute inset-0 w-full h-full overflow-hidden" style={{ clipPath: 'inset(0 0 0 var(--slider-pos, 50%))' }}>
-                    <img src={previewUrl} className="absolute inset-0 w-full h-full object-contain" alt="Result" />
+                    <img src={previewUrl} className="absolute inset-0 w-full h-full object-contain" alt="加工後" />
                   </div>
-                  <input type="range" min="0" max="100" defaultValue="50" className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20"
-                    onInput={(e) => e.currentTarget.parentElement?.style.setProperty('--slider-pos', `${e.currentTarget.value}%`)} />
-                  <div className="absolute inset-y-0 w-1 bg-white shadow-[0_0_10px_rgba(0,0,0,0.3)] z-10 pointer-events-none" style={{ left: 'var(--slider-pos, 50%)' }}>
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-white rounded-full shadow-2xl flex items-center justify-center border-2 border-primary/20">
-                      <ChevronLeft className="w-3 h-3 md:w-4 md:h-4 text-zinc-400 -mr-1" />
-                      <ChevronRight className="w-3 h-3 md:w-4 md:h-4 text-zinc-400 -ml-1" />
+                  <input 
+                    type="range" min="0" max="100" defaultValue="50" 
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20 focus-visible:opacity-10 focus-visible:bg-primary/20 transition-opacity outline-none"
+                    onInput={(e) => e.currentTarget.parentElement?.style.setProperty('--slider-pos', `${e.currentTarget.value}%`)} 
+                    aria-label="比較スライダー。左右の矢印キーで動かして加工前後を比較できます。"
+                  />
+                  <div className="absolute inset-y-0 w-1 bg-white shadow-[0_0_15px_rgba(0,0,0,0.5)] z-10 pointer-events-none" style={{ left: 'var(--slider-pos, 50%)' }}>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white dark:bg-zinc-900 rounded-full shadow-2xl flex items-center justify-center border-4 border-primary/20 transform transition-transform group-hover:scale-110">
+                      <ChevronLeft className="w-4 h-4 text-primary -mr-1" />
+                      <ChevronRight className="w-4 h-4 text-primary -ml-1" />
                     </div>
+                  </div>
+                  <div className="absolute bottom-4 left-4 right-4 flex justify-between pointer-events-none px-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="bg-black/40 backdrop-blur-md text-white text-[10px] font-black uppercase px-2 py-1 rounded">Before</span>
+                    <span className="bg-primary text-white text-[10px] font-black uppercase px-2 py-1 rounded">After</span>
                   </div>
                 </div>
               </motion.section>
             )}
 
-            <section className="space-y-4">
+            <section className="space-y-6">
               <DropZone onFilesAdded={handleFilesAdded} />
             </section>
 
-            <section className="space-y-4">
-              <div className="flex justify-between items-center px-2">
-                <h2 className="text-xl md:text-2xl font-bold">変換リスト</h2>
-                {images.length > 0 && <Button variant="ghost" size="sm" onClick={clearAll} className="text-destructive">クリア</Button>}
+            <section className="space-y-6">
+              <div className="flex justify-between items-center px-4">
+                <h2 className="text-xl md:text-2xl font-bold tracking-tight">変換リスト</h2>
+                {images.length > 0 && (
+                  <Button variant="ghost" size="sm" onClick={clearAll} className="text-destructive hover:bg-destructive/10 text-xs font-bold h-9 px-3">
+                    <Trash2 className="w-4 h-4 mr-2" /> リストを空にする
+                  </Button>
+                )}
               </div>
-              <ImageList images={images} onRemove={removeImage} />
+              <ImageList images={images} onRemove={removeImage} renamePattern={settings.renamePattern} />
             </section>
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-4 space-y-6">
+          <div className="lg:col-span-4 space-y-8">
             <ConversionSettings settings={settings} updateSettings={updateSetting} onReset={resetSettings} />
 
-            <div className="sticky bottom-4 lg:relative flex flex-col gap-3 p-4 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md rounded-2xl border shadow-2xl lg:shadow-none lg:bg-transparent lg:border-none lg:p-0 z-40">
-              <Button className="w-full h-12 md:h-14 text-lg font-bold gap-3 shadow-xl" size="lg" disabled={images.length === 0 || isProcessing} onClick={processImages}>
-                {isProcessing ? "処理中..." : <><Play className="w-5 h-5 fill-current" /> 一括変換を開始</>}
+            <div className="sticky bottom-4 lg:relative flex flex-col gap-4 p-5 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl rounded-[2rem] border shadow-2xl lg:shadow-none lg:bg-transparent lg:border-none lg:p-0 z-40">
+              <Button 
+                className="w-full h-14 md:h-16 text-lg font-black gap-3 shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-transform" 
+                size="lg" 
+                disabled={images.length === 0 || isProcessing} 
+                onClick={processImages}
+              >
+                {isProcessing ? (
+                  <div className="flex flex-col items-center justify-center w-full gap-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span className="font-black">処理中 ({images.filter(i => i.status === 'completed').length}/{images.length})</span>
+                    </div>
+                    <div className="w-full max-w-[200px] h-1.5 bg-white/20 rounded-full overflow-hidden">
+                      <motion.div 
+                        className="h-full bg-white" 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${(images.filter(i => i.status === 'completed').length / images.length) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <><Play className="w-6 h-6 fill-current" /> 一括変換を開始</>
+                )}
               </Button>
-              <Button variant="outline" className="w-full h-12 md:h-14 text-lg font-bold gap-3" size="lg" disabled={images.length === 0 || !images.some(img => img.result) || isProcessing} onClick={downloadAll}>
-                <Download className="w-5 h-5" /> ZIP一括保存
+              <Button 
+                variant="outline" 
+                className="w-full h-14 md:h-16 text-lg font-black gap-3 border-2 hover:bg-muted" 
+                size="lg" 
+                disabled={images.length === 0 || !images.some(img => img.result) || isProcessing} 
+                onClick={downloadAll}
+              >
+                <Download className="w-6 h-6" /> ZIP一括保存
               </Button>
             </div>
           </div>
         </div>
 
-        {/* Improved SEO & Privacy Text Section - Moved to absolute bottom */}
-        <div className="mt-20 pt-20 border-t border-muted space-y-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold">プライバシー第一の画像処理</h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                画像はサーバーに送信されません。すべての処理はブラウザのメモリ内で行われます。
-                あなたのプライバシーは100%守られます。
+        {/* Improved SEO & Privacy Text Section */}
+        <div className="mt-24 pt-20 border-t border-muted/50 space-y-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+            <div className="space-y-6">
+              <h2 className="text-3xl font-black tracking-tight">プライバシー第一の画像処理</h2>
+              <p className="text-base text-muted-foreground leading-relaxed font-medium">
+                あなたの画像データがサーバーへ送られることはありません。すべての計算処理は、今お使いのブラウザ内（デバイスのメモリ上）だけで安全に実行されます。
+                軍事レベルの機密画像でも、安心してご利用いただけます。
               </p>
             </div>
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold">WebP / AVIF 完全対応</h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                最新の圧縮技術で画質を落とさず軽量化。オフラインでも動作します。
-                PageSpeed Insightsなどのパフォーマンス改善に最適です。
+            <div className="space-y-6">
+              <h2 className="text-3xl font-black tracking-tight">WebP / AVIF 完全対応</h2>
+              <p className="text-base text-muted-foreground leading-relaxed font-medium">
+                最新の画像圧縮技術（WebP, AVIF）を駆使し、画質を極限まで保ちつつファイルサイズを軽量化します。
+                完全なオフライン（機内モードなど）でも動作するため、通信環境を問いません。
               </p>
             </div>
           </div>
 
-          <div className="bg-primary/5 rounded-3xl p-8 md:p-12 border border-primary/10">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div className="bg-primary/5 rounded-[2.5rem] p-10 md:p-14 border border-primary/10">
+            <h3 className="text-lg font-black mb-10 text-center uppercase tracking-widest text-primary/60">One-click Pro Features</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
               <div>
-                <div className="font-bold text-primary text-xl">連番</div>
-                <p className="text-[10px] uppercase tracking-widest opacity-50">Rename</p>
+                <div className="font-black text-primary text-2xl mb-1">連番</div>
+                <p className="text-xs uppercase tracking-widest font-bold opacity-40 italic">Smart Rename</p>
               </div>
               <div>
-                <div className="font-bold text-primary text-xl">合成</div>
-                <p className="text-[10px] uppercase tracking-widest opacity-50">Overlay</p>
+                <div className="font-black text-primary text-2xl mb-1">合成</div>
+                <p className="text-xs uppercase tracking-widest font-bold opacity-40 italic">Brand Overlay</p>
               </div>
               <div>
-                <div className="font-bold text-primary text-xl">角丸</div>
-                <p className="text-[10px] uppercase tracking-widest opacity-50">Edit</p>
+                <div className="font-black text-primary text-2xl mb-1">角丸</div>
+                <p className="text-xs uppercase tracking-widest font-bold opacity-40 italic">Modern Edit</p>
               </div>
               <div>
-                <div className="font-bold text-primary text-xl">0%</div>
-                <p className="text-[10px] uppercase tracking-widest opacity-50">Serverless</p>
+                <div className="font-black text-primary text-2xl mb-1">保護</div>
+                <p className="text-xs uppercase tracking-widest font-bold opacity-40 italic">Privacy First</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <footer className="border-t py-12 mt-20 bg-muted/5">
-        <div className="max-w-6xl mx-auto px-6 text-center space-y-8">
-          <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
-            <Link href="/privacy" className="hover:text-primary">プライバシーポリシー</Link>
-            <Link href="/terms" className="hover:text-primary">利用規約</Link>
-            <Link href="/contact" className="hover:text-primary">お問い合わせ</Link>
+      <footer className="border-t py-16 mt-20 bg-muted/5">
+        <div className="max-w-6xl mx-auto px-6 text-center space-y-10">
+          <div className="flex flex-wrap justify-center gap-x-12 gap-y-6 text-sm font-bold text-muted-foreground">
+            <Link href="/guide" className="hover:text-primary transition-colors">ご利用ガイド</Link>
+            <Link href="/privacy" className="hover:text-primary transition-colors">プライバシーポリシー</Link>
+            <Link href="/terms" className="hover:text-primary transition-colors">利用規約</Link>
+            <Link href="/contact" className="hover:text-primary transition-colors">お問い合わせ</Link>
           </div>
-          <p className="text-xs text-muted-foreground/60 max-w-sm mx-auto leading-relaxed">
-            © 2026 Privacy Image Processor. 100% Client-side privacy guaranteed. No data collection.
-          </p>
+          <div className="space-y-4">
+            <div className="flex justify-center gap-2 scale-75 opacity-20 hover:opacity-100 transition-opacity">
+              <div className="bg-zinc-400 w-2 h-2 rounded-full" />
+              <div className="bg-zinc-400 w-2 h-2 rounded-full" />
+              <div className="bg-zinc-400 w-2 h-2 rounded-full" />
+            </div>
+            <p className="text-xs text-muted-foreground/60 max-w-sm mx-auto leading-relaxed font-medium">
+              © 2026 Privacy Image Processor. Made for professionals who value data sovereignty.
+            </p>
+          </div>
         </div>
       </footer>
     </main>
