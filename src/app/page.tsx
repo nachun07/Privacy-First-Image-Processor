@@ -8,7 +8,7 @@ import { processImageWithCanvas, ProcessingSettings } from '@/lib/image-processo
 import { Button } from '@/components/ui/button';
 import { 
   Download, Play, Trash2, ShieldCheck, Moon, Sun, X, BarChart3,
-  ExternalLink, Code
+  ExternalLink, Code, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 import JSZip from 'jszip';
@@ -41,7 +41,12 @@ export default function Home() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewOriginalUrl, setPreviewOriginalUrl] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // 計算された統計
   const stats = useMemo(() => {
@@ -73,7 +78,6 @@ export default function Home() {
       }
       
       try {
-        // プレビュー用なのでサイズを少し抑えて高速化
         const previewSettings = { ...settings, maxWidth: 800 }; 
         const result = await processImageWithCanvas(firstImage.file, previewSettings, 0);
         if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -95,10 +99,9 @@ export default function Home() {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
 
-  // プリセット機能
   const savePreset = () => {
     localStorage.setItem('pfip_preset', JSON.stringify(settings));
-    toast.success('現在の設定をプリセットとして保存しました');
+    toast.success('プリセットを保存しました');
   };
 
   const loadPreset = () => {
@@ -107,7 +110,7 @@ export default function Home() {
       setSettings(JSON.parse(saved));
       toast.success('プリセットを読み込みました');
     } else {
-      toast.error('保存されたプリセットが見つかりません');
+      toast.error('保存されたプリセットがありません');
     }
   };
 
@@ -163,38 +166,23 @@ export default function Home() {
 
   const processImages = async () => {
     if (images.length === 0 || isProcessing) return;
-    
-    // 処理開始前にすべてのステートをリセット（再変換を可能にする）
-    setImages(prev => prev.map(img => ({ ...img, status: 'pending', progress: 0 })));
     setIsProcessing(true);
-
     try {
-      // ステート反映を待つための微小な待機
       await new Promise(resolve => setTimeout(resolve, 100));
-
       for (let i = 0; i < images.length; i++) {
         const img = images[i];
-        
         setImages(prev => prev.map(item => 
-          item.id === img.id ? { ...item, status: 'processing', progress: 30 } : item
+          item.id === img.id ? { ...item, status: 'processing', progress: 50 } : item
         ));
-
-        // Canvasエンジンで処理
         const processed = await processImageWithCanvas(img.file, settings, i);
-
         setImages(prev => prev.map(item => 
           item.id === img.id ? { ...item, status: 'completed', progress: 100, result: processed } : item
         ));
       }
-      toast.success('すべての変換が完了しました');
-
-      // 変換完了後に自動ダウンロードが有効な場合はZIP生成を開始
-      if (settings.autoDownload) {
-        setTimeout(() => downloadAll(), 500);
-      }
+      toast.success('変換完了');
+      if (settings.autoDownload) setTimeout(() => downloadAll(), 500);
     } catch (error) {
-      console.error(error);
-      toast.error('変換中にエラーが発生しました');
+      toast.error('エラーが発生しました');
     } finally {
       setIsProcessing(false);
     }
@@ -203,254 +191,157 @@ export default function Home() {
   const downloadAll = async () => {
     const zip = new JSZip();
     const completed = images.filter(img => img.result);
-    
-    if (completed.length === 0) {
-      toast.error('変換された画像がありません');
-      return;
-    }
-
+    if (completed.length === 0) return;
     completed.forEach(img => {
       if (img.result) zip.file(img.result.name, img.result);
     });
-
     const content = await zip.generateAsync({ type: 'blob' });
     const url = URL.createObjectURL(content);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `optimized_images_${new Date().getTime()}.zip`;
+    a.download = `optimized_${new Date().getTime()}.zip`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success('ZIPファイルをダウンロードしました');
   };
 
+  if (!isClient) return null;
+
   return (
-    <main className={`min-h-screen ${isDarkMode ? 'dark bg-zinc-950 text-zinc-100' : 'bg-[#fafafa] text-zinc-900'} selection:bg-primary selection:text-primary-foreground transition-colors duration-300`}>
+    <main className={`min-h-screen ${isDarkMode ? 'dark bg-zinc-950 text-zinc-100' : 'bg-[#fafafa] text-zinc-900'} transition-colors duration-300`}>
       {/* Navigation */}
-      <nav className="border-b bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-primary p-2 rounded-xl">
-              <ShieldCheck className="w-6 h-6 text-white" />
+      <nav className="border-b bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="bg-primary p-1.5 md:p-2 rounded-xl">
+              <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
-            <span className="font-bold text-xl tracking-tight">Privacy Image Processor</span>
+            <span className="font-bold text-base md:text-xl tracking-tight">Privacy Image</span>
           </div>
           
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
             {stats.originalTotal > 0 && (
-              <div className="hidden md:flex items-center gap-4 text-xs font-bold font-mono">
-                <div className="flex flex-col items-end">
-                  <span className="text-muted-foreground uppercase text-[8px] tracking-widest">Savings</span>
-                  <span className="text-primary">{(stats.saved / 1024 / 1024).toFixed(2)} MB ({stats.savingRate.toFixed(1)}%)</span>
-                </div>
-                <div className="bg-primary/10 p-2 rounded-lg">
-                  <BarChart3 className="w-4 h-4 text-primary" />
-                </div>
+              <div className="hidden md:flex items-center gap-2 text-xs font-mono">
+                <span className="text-primary font-bold">{(stats.saved / 1024 / 1024).toFixed(1)}MB saved</span>
               </div>
             )}
-            <Button variant="ghost" size="icon" onClick={() => setIsDarkMode(!isDarkMode)} className="rounded-full shadow-none hover:bg-muted outline-none border-none">
+            <Button variant="ghost" size="icon" onClick={() => setIsDarkMode(!isDarkMode)} className="rounded-full w-9 h-9">
               {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </Button>
           </div>
         </div>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
           
           {/* Main Area */}
-          <div className="lg:col-span-8 space-y-10">
+          <div className="lg:col-span-8 space-y-8 md:space-y-10">
             {previewUrl && (
-              <motion.section
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-4"
-              >
-                <div className="flex justify-between items-end px-2">
-                  <div>
-                    <h2 className="text-xl font-bold tracking-tight">ライブプレビュー</h2>
-                    <p className="text-muted-foreground text-xs">スライダーを動かして加工前後を比較できます</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={loadPreset} className="h-8 text-xs gap-2">
-                      復元
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={savePreset} className="h-8 text-xs gap-2 text-primary border-primary/20 bg-primary/5">
-                      プリセット保存
-                    </Button>
+              <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+                  <h2 className="text-xl font-bold tracking-tight px-2">ライブプレビュー</h2>
+                  <div className="flex gap-2 w-full sm:w-auto px-2">
+                    <Button variant="outline" size="sm" onClick={loadPreset} className="flex-1 h-8 text-xs">復元</Button>
+                    <Button variant="outline" size="sm" onClick={savePreset} className="flex-1 h-8 text-xs text-primary bg-primary/5 border-primary/20">保存</Button>
                   </div>
                 </div>
                 
-                <div className="relative aspect-video rounded-3xl overflow-hidden border-4 border-white dark:border-zinc-800 shadow-2xl bg-muted/30 group">
-                  {/* Before (Original) */}
+                <div className="relative aspect-video rounded-2xl md:rounded-3xl overflow-hidden border-2 md:border-4 border-white dark:border-zinc-800 shadow-xl bg-muted/40">
                   <img src={previewOriginalUrl || ''} className="absolute inset-0 w-full h-full object-contain" alt="Original" />
-                  
-                  {/* After (Processed) */}
-                  <div 
-                    className="absolute inset-0 w-full h-full overflow-hidden"
-                    style={{ clipPath: 'inset(0 0 0 var(--slider-pos, 50%))' }}
-                  >
+                  <div className="absolute inset-0 w-full h-full overflow-hidden" style={{ clipPath: 'inset(0 0 0 var(--slider-pos, 50%))' }}>
                     <img src={previewUrl} className="absolute inset-0 w-full h-full object-contain" alt="Result" />
                   </div>
-
-                  {/* Slider Control */}
-                  <input 
-                    type="range"
-                    min="0"
-                    max="100"
-                    defaultValue="50"
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20"
-                    onInput={(e) => {
-                      const container = e.currentTarget.parentElement;
-                      if (container) container.style.setProperty('--slider-pos', `${e.currentTarget.value}%`);
-                    }}
-                  />
-                  
-                  {/* Visible Bar */}
-                  <div 
-                    className="absolute inset-y-0 w-1 bg-white shadow-[0_0_15px_rgba(0,0,0,0.3)] z-10 pointer-events-none"
-                    style={{ left: 'var(--slider-pos, 50%)' }}
-                  >
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-xl flex items-center justify-center">
-                      <div className="flex gap-0.5">
-                        <div className="w-1 h-3 bg-zinc-300 rounded-full" />
-                        <div className="w-1 h-3 bg-zinc-300 rounded-full" />
-                      </div>
+                  <input type="range" min="0" max="100" defaultValue="50" className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20"
+                    onInput={(e) => e.currentTarget.parentElement?.style.setProperty('--slider-pos', `${e.currentTarget.value}%`)} />
+                  <div className="absolute inset-y-0 w-1 bg-white shadow-[0_0_10px_rgba(0,0,0,0.3)] z-10 pointer-events-none" style={{ left: 'var(--slider-pos, 50%)' }}>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-white rounded-full shadow-2xl flex items-center justify-center border-2 border-primary/20">
+                      <ChevronLeft className="w-3 h-3 md:w-4 md:h-4 text-zinc-400 -mr-1" />
+                      <ChevronRight className="w-3 h-3 md:w-4 md:h-4 text-zinc-400 -ml-1" />
                     </div>
                   </div>
-
-                  {/* Labels */}
-                  <div className="absolute top-4 left-4 bg-black/50 text-white text-[10px] font-bold px-3 py-1 rounded-full backdrop-blur-md pointer-events-none">ORIGINAL</div>
-                  <div className="absolute top-4 right-4 bg-primary/80 text-white text-[10px] font-bold px-3 py-1 rounded-full backdrop-blur-md pointer-events-none">PROCESSED</div>
                 </div>
               </motion.section>
             )}
 
-            <section className="space-y-6">
-              <div className="flex items-center gap-3 px-2">
-                <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-                <h2 className="text-sm font-bold tracking-widest uppercase text-primary/50">Drop & Convert</h2>
-                <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-              </div>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-              >
-                <DropZone onFilesAdded={handleFilesAdded} />
-              </motion.div>
+            <section className="space-y-4">
+              <DropZone onFilesAdded={handleFilesAdded} />
             </section>
 
-            <section className="space-y-6">
-              <div className="flex justify-between items-end">
-                <div>
-                  <h2 className="text-2xl font-bold tracking-tight">変換リスト</h2>
-                  <p className="text-muted-foreground text-sm">変換する画像を確認してください</p>
-                </div>
-                {images.length > 0 && (
-                  <Button variant="outline" size="sm" onClick={clearAll} className="gap-2 text-destructive hover:text-destructive">
-                    <Trash2 className="w-4 h-4" /> 全て削除
-                  </Button>
-                )}
+            <section className="space-y-4">
+              <div className="flex justify-between items-center px-2">
+                <h2 className="text-xl md:text-2xl font-bold">変換リスト</h2>
+                {images.length > 0 && <Button variant="ghost" size="sm" onClick={clearAll} className="text-destructive">クリア</Button>}
               </div>
-              
               <ImageList images={images} onRemove={removeImage} />
-              
-              {images.length === 0 && (
-                <div className="text-center py-20 border-2 border-dotted rounded-2xl bg-muted/20">
-                  <p className="text-muted-foreground">画像が選択されていません</p>
-                </div>
-              )}
-            </section>
-
-            {/* SEO Content Section to fix Soft 404 */}
-            <section className="pt-20 space-y-16 border-t border-dashed border-muted">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <div className="space-y-4">
-                  <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">プライバシーを第一に考えた画像処理</h2>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Privacy Image Processorは、機密性の高い画像を扱うプロフェッショナルのために開発されました。
-                    一般的なオンラインコンバーターとは異なり、あなたの画像は一瞬たりともサーバーに送信されることはありません。
-                    すべてのピクセル操作は、あなたのブラウザ内（クライアントサイド）メモリ上でのみ実行されます。
-                  </p>
-                </div>
-                <div className="space-y-4">
-                  <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">次世代フォーマット WebP / AVIF 対応</h2>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    最新の圧縮アルゴリズムを活用し、画質を維持したままファイルサイズを劇的に軽量化します。
-                    AVIF形式への一括変換もサポートしており、Webサイトの高速化（PageSpeed Insightsの改善）に大きく貢献します。
-                    オフラインでも動作する設計により、場所を選ばず安全に作業が可能です。
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-primary/5 rounded-3xl p-8 md:p-12 border border-primary/10">
-                <h2 className="text-xl font-bold mb-6 text-center">プロ仕様の編集機能を一括適用</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                  <div>
-                    <div className="font-bold text-primary text-xl mb-1">連番</div>
-                    <div className="text-[10px] text-muted-foreground">一括リネーム</div>
-                  </div>
-                  <div>
-                    <div className="font-bold text-primary text-xl mb-1">合成</div>
-                    <div className="text-[10px] text-muted-foreground">ロゴ・文字入れ</div>
-                  </div>
-                  <div>
-                    <div className="font-bold text-primary text-xl mb-1">角丸</div>
-                    <div className="text-[10px] text-muted-foreground">SNS最適化</div>
-                  </div>
-                  <div>
-                    <div className="font-bold text-primary text-xl mb-1">0%</div>
-                    <div className="text-[10px] text-muted-foreground">サーバー通信なし</div>
-                  </div>
-                </div>
-              </div>
             </section>
           </div>
 
           {/* Sidebar */}
           <div className="lg:col-span-4 space-y-6">
-            <ConversionSettings
-              settings={settings}
-              updateSettings={updateSetting}
-              onReset={resetSettings}
-            />
+            <ConversionSettings settings={settings} updateSettings={updateSetting} onReset={resetSettings} />
 
-            <div className="space-y-3">
-              <Button
-                className="w-full h-14 text-lg font-bold gap-3 shadow-xl shadow-primary/20"
-                size="lg"
-                disabled={images.length === 0 || isProcessing}
-                onClick={processImages}
-              >
-                {isProcessing ? (
-                  <>処理中...</>
-                ) : (
-                  <><Play className="w-5 h-5 fill-current" /> 一括変換を開始</>
-                )}
+            <div className="sticky bottom-4 lg:relative flex flex-col gap-3 p-4 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md rounded-2xl border shadow-2xl lg:shadow-none lg:bg-transparent lg:border-none lg:p-0 z-40">
+              <Button className="w-full h-12 md:h-14 text-lg font-bold gap-3 shadow-xl" size="lg" disabled={images.length === 0 || isProcessing} onClick={processImages}>
+                {isProcessing ? "処理中..." : <><Play className="w-5 h-5 fill-current" /> 一括変換を開始</>}
               </Button>
+              <Button variant="outline" className="w-full h-12 md:h-14 text-lg font-bold gap-3" size="lg" disabled={images.length === 0 || !images.some(img => img.result) || isProcessing} onClick={downloadAll}>
+                <Download className="w-5 h-5" /> ZIP一括保存
+              </Button>
+            </div>
+          </div>
+        </div>
 
-              <Button
-                variant="outline"
-                className="w-full h-14 text-lg font-bold gap-3"
-                size="lg"
-                disabled={images.length === 0 || !images.some(img => img.status === 'completed') || isProcessing}
-                onClick={downloadAll}
-              >
-                <Download className="w-5 h-5" /> ZIPで一括保存
-              </Button>
+        {/* Improved SEO & Privacy Text Section - Moved to absolute bottom */}
+        <div className="mt-20 pt-20 border-t border-muted space-y-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold">プライバシー第一の画像処理</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                画像はサーバーに送信されません。すべての処理はブラウザのメモリ内で行われます。
+                あなたのプライバシーは100%守られます。
+              </p>
+            </div>
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold">WebP / AVIF 完全対応</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                最新の圧縮技術で画質を落とさず軽量化。オフラインでも動作します。
+                PageSpeed Insightsなどのパフォーマンス改善に最適です。
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-primary/5 rounded-3xl p-8 md:p-12 border border-primary/10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              <div>
+                <div className="font-bold text-primary text-xl">連番</div>
+                <p className="text-[10px] uppercase tracking-widest opacity-50">Rename</p>
+              </div>
+              <div>
+                <div className="font-bold text-primary text-xl">合成</div>
+                <p className="text-[10px] uppercase tracking-widest opacity-50">Overlay</p>
+              </div>
+              <div>
+                <div className="font-bold text-primary text-xl">角丸</div>
+                <p className="text-[10px] uppercase tracking-widest opacity-50">Edit</p>
+              </div>
+              <div>
+                <div className="font-bold text-primary text-xl">0%</div>
+                <p className="text-[10px] uppercase tracking-widest opacity-50">Serverless</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <footer className="border-t py-12 bg-muted/10">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <div className="flex justify-center gap-8 mb-8 text-sm text-muted-foreground font-medium">
-            <Link href="/privacy" className="hover:text-primary transition-colors">プライバシーポリシー</Link>
-            <Link href="/terms" className="hover:text-primary transition-colors">利用規約</Link>
-            <Link href="/contact" className="hover:text-primary transition-colors">お問い合わせ</Link>
+      <footer className="border-t py-12 mt-20 bg-muted/5">
+        <div className="max-w-6xl mx-auto px-6 text-center space-y-8">
+          <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
+            <Link href="/privacy" className="hover:text-primary">プライバシーポリシー</Link>
+            <Link href="/terms" className="hover:text-primary">利用規約</Link>
+            <Link href="/contact" className="hover:text-primary">お問い合わせ</Link>
           </div>
-          <p className="text-sm text-muted-foreground/60">
-            © 2026 Privacy Image Processor. No images are sent to any server. Built with Next.js & browser-image-compression.
+          <p className="text-xs text-muted-foreground/60 max-w-sm mx-auto leading-relaxed">
+            © 2026 Privacy Image Processor. 100% Client-side privacy guaranteed. No data collection.
           </p>
         </div>
       </footer>
