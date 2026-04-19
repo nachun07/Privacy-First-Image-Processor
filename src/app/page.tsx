@@ -394,6 +394,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6 text-center space-y-10">
           <div className="flex flex-wrap justify-center gap-x-12 gap-y-6 text-sm font-bold text-muted-foreground">
             <Link href="/guide" className="hover:text-primary transition-colors">ご利用ガイド</Link>
+            <Link href="/updates" className="hover:text-primary transition-colors text-primary italic">アップデート・不具合報告</Link>
             <Link href="/privacy" className="hover:text-primary transition-colors">プライバシーポリシー</Link>
             <Link href="/terms" className="hover:text-primary transition-colors">利用規約</Link>
             <Link href="/contact" className="hover:text-primary transition-colors">お問い合わせ</Link>

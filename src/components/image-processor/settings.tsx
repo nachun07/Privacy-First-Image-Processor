@@ -178,11 +178,24 @@ export const ConversionSettings: React.FC<SettingsProps> = ({
                 </div>
               )}
               <div className="space-y-3">
-                <Label className="text-sm font-bold text-zinc-600 dark:text-zinc-400">画像全体の最大サイズ（横幅）</Label>
+                <div className="flex justify-between items-center">
+                  <Label className="text-sm font-bold text-zinc-600 dark:text-zinc-400">リサイズ（横幅）</Label>
+                  <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-bold">強制リサイズ設定</span>
+                </div>
                 <div className="flex gap-2 items-center">
-                  <Input type="number" value={settings.maxWidth} onChange={(e) => updateSettings('maxWidth', Number(e.target.value))} className="h-11 bg-muted/20 text-sm font-bold" />
+                  <Input 
+                    type="number" 
+                    value={settings.maxWidth === 0 ? '' : settings.maxWidth} 
+                    onChange={(e) => updateSettings('maxWidth', e.target.value === '' ? 0 : Number(e.target.value))} 
+                    placeholder="元のサイズのまま"
+                    className="h-11 bg-muted/20 text-sm font-bold" 
+                  />
                   <span className="text-xs text-muted-foreground font-bold">px</span>
                 </div>
+                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                  数値を指定すると、その横幅に合わせて画像が拡大・縮小されます。
+                  <br />空欄、または0にすると元のサイズのまま処理します。
+                </p>
               </div>
             </AccordionContent>
           </AccordionItem>

@@ -43,10 +43,11 @@ export const processImageWithCanvas = async (
         if (!ctx) return reject('Canvas context not available');
 
         // 1. Calculate Dimensions
+        // 1. Calculate Dimensions (Always resize to maxWidth if specified, or keep original)
         let targetWidth = img.width;
         let targetHeight = img.height;
 
-        if (settings.maxWidth > 0 && targetWidth > settings.maxWidth) {
+        if (settings.maxWidth > 0) {
           const ratio = settings.maxWidth / targetWidth;
           targetWidth = settings.maxWidth;
           targetHeight = img.height * ratio;
@@ -55,14 +56,14 @@ export const processImageWithCanvas = async (
         let canvasWidth = targetWidth;
         let canvasHeight = targetHeight;
 
-        if (settings.aspectRatio !== 'original') {
+        if (settings.aspectRatio && settings.aspectRatio !== 'original') {
           const ratioMap: Record<string, number> = {
             '1:1': 1,
             '16:9': 16/9,
             '4:3': 4/3,
             '9:16': 9/16
           };
-          const targetRatio = ratioMap[settings.aspectRatio];
+          const targetRatio = ratioMap[settings.aspectRatio] || 1;
           if (canvasWidth / canvasHeight > targetRatio) {
             canvasHeight = canvasWidth / targetRatio;
           } else {
@@ -77,17 +78,13 @@ export const processImageWithCanvas = async (
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
         // 3. Draw Background
-        if (settings.aspectRatio !== 'original') {
+        if (settings.aspectRatio && settings.aspectRatio !== 'original') {
           if (settings.backgroundMode === 'blur') {
             ctx.save();
-            // Create a blurred overflow background
             ctx.filter = 'blur(60px) brightness(0.7) saturate(1.2)';
-            // Draw a slightly larger image to avoid edge bleed from blur
             const bleed = 100;
             ctx.drawImage(img, -bleed, -bleed, canvasWidth + (bleed * 2), canvasHeight + (bleed * 2));
             ctx.restore();
-            
-            // Add a subtle dark overlay for better contrast
             ctx.fillStyle = 'rgba(0,0,0,0.2)';
             ctx.fillRect(0, 0, canvasWidth, canvasHeight);
           } else {
@@ -95,7 +92,6 @@ export const processImageWithCanvas = async (
             ctx.fillRect(0, 0, canvasWidth, canvasHeight);
           }
         } else if (settings.format === 'image/jpeg') {
-          // JPEG doesn't support transparency, default to white background if original aspect
           ctx.fillStyle = '#ffffff';
           ctx.fillRect(0, 0, canvasWidth, canvasHeight);
         }
@@ -106,10 +102,11 @@ export const processImageWithCanvas = async (
 
         ctx.save();
 
-        // [CORNER ROUNDING LOGIC] 
-        // We define the path for the rounded rectangle based on the sub-image size
+        // [ENHANCED CORNER ROUNDING]
         if (settings.cornerRadius > 0) {
-          const radius = (Math.min(targetWidth, targetHeight) / 200) * settings.cornerRadius;
+          const minSide = Math.min(targetWidth, targetHeight);
+          const radius = (minSide / 200) * settings.cornerRadius;
+          
           ctx.beginPath();
           ctx.moveTo(dx + radius, dy);
           ctx.arcTo(dx + targetWidth, dy, dx + targetWidth, dy + targetHeight, radius);
@@ -189,7 +186,8 @@ export const processImageWithCanvas = async (
         // 6. Export with Naming Logic
         canvas.toBlob((blob) => {
           if (blob) {
-            let extension = settings.format.split('/')[1].replace('jpeg', 'jpg');
+            const format = settings.format || 'image/webp';
+            const extension = format.split('/')[1]?.replace('jpeg', 'jpg') || 'webp';
             const originalNameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
             
             let exportName = settings.renamePattern || '{{filename}}';
@@ -197,15 +195,15 @@ export const processImageWithCanvas = async (
               .replace(/{{filename}}/g, originalNameWithoutExt)
               .replace(/{{index}}/g, (index + 1).toString().padStart(2, '0'))
               .replace(/##/g, (index + 1).toString().padStart(2, '0'))
-              .replace(/{{date}}/g, new Date().toISOString().split('T')[0]);
+              .replace(/{{date}}/g, (new Date().toISOString().split('T')[0] || ''));
             
             if (!exportName.includes(originalNameWithoutExt) && !settings.renamePattern) {
               exportName = `${originalNameWithoutExt}_processed`;
             }
 
-            resolve(new File([blob], `${exportName}.${extension}`, { type: settings.format }));
+            resolve(new File([blob], `${exportName}.${extension}`, { type: format }));
           } else reject('Export failed');
-        }, settings.format, settings.quality / 100);
+        }, settings.format || 'image/webp', settings.quality / 100);
       };
       img.src = e.target?.result as string;
     };

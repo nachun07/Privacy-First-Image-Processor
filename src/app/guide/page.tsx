@@ -212,7 +212,8 @@ export default function Guide() {
 
       <footer className="border-t py-16 bg-zinc-50 dark:bg-zinc-900/30">
         <div className="max-w-5xl mx-auto px-6 text-center space-y-8">
-           <div className="flex justify-center gap-6">
+           <div className="flex flex-wrap justify-center gap-6 md:gap-12">
+             <Link href="/updates" className="text-sm font-bold text-primary italic hover:underline">アップデート履歴</Link>
              <Link href="/privacy" className="text-sm font-bold text-muted-foreground hover:text-primary">プライバシー</Link>
              <Link href="/terms" className="text-sm font-bold text-muted-foreground hover:text-primary">利用規約</Link>
              <Link href="/contact" className="text-sm font-bold text-muted-foreground hover:text-primary">お問い合わせ</Link>
