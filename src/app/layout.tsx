@@ -15,8 +15,21 @@ const geistMono = Geist_Mono({
 import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
-  title: "Privacy Image Processor | 安全・高速なブラウザ完結型画像変換ツール",
-  description: "画像を一切サーバーに送信しない、プライバシー重視の画像圧縮・WebP変換ツールです。複数画像の一括処理に対応。",
+  title: 'Privacy Image Processor | 完全無料のブラウザ完結型画像加工ツール',
+  description: '画像データを一切サーバーに送信しない、プライバシー重視の画像加工アプリ。WebP/AVIF変換、一括リサイズ、ロゴ合成、角丸加工などがブラウザ内ですべて完結。',
+  keywords: ['画像加工', '画像圧縮', 'プライバシー', 'WebP変換', 'AVIF変換', 'リサイズ', '無料ツール', 'クライアントサイド'],
+  authors: [{ name: 'Privacy Image Processor Team' }],
+  openGraph: {
+    title: 'Privacy Image Processor | 完全無料・サーバー送信なしの画像加工',
+    description: 'あなたの画像を守る。すべての処理はブラウザ内で。',
+    type: 'website',
+    locale: 'ja_JP',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Privacy Image Processor',
+    description: '完全無料でセキュアな画像加工。WebP/AVIF対応。',
+  },
 };
 
 export default function RootLayout({
