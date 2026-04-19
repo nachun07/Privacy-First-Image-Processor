@@ -55,8 +55,16 @@ export default function Contact() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="email">返信先メールアドレス</Label>
-                <Input id="email" name="email" type="email" placeholder="example@mail.com" required />
+                <Label htmlFor="email">あなたのメールアドレス（こちらへ返信します）</Label>
+                <Input 
+                  id="email" 
+                  name="email" 
+                  type="email" 
+                  placeholder="example@mail.com" 
+                  required 
+                  onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity('有効なメールアドレスを入力してください')}
+                  onInput={(e) => (e.target as HTMLInputElement).setCustomValidity('')}
+                />
               </div>
 
               <div className="space-y-2">
