@@ -62,7 +62,15 @@ export default function Contact() {
                   type="email" 
                   placeholder="example@mail.com" 
                   required 
-                  onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity('有効なメールアドレスを入力してください')}
+                  pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                  onInvalid={(e) => {
+                    const input = e.target as HTMLInputElement;
+                    if (input.validity.valueMissing) {
+                      input.setCustomValidity('メールアドレスを入力してください');
+                    } else {
+                      input.setCustomValidity('有効な形式（例：user@example.com）で入力してください');
+                    }
+                  }}
                   onInput={(e) => (e.target as HTMLInputElement).setCustomValidity('')}
                 />
               </div>
