@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 import { Toaster } from "@/components/ui/sonner";
+import { CookieConsent } from "@/components/ui/cookie-consent";
 
 export const metadata: Metadata = {
   title: 'Privacy Image Processor | 完全無料のブラウザ完結型画像加工ツール',
@@ -45,6 +46,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         {children}
         <Toaster position="top-right" closeButton richColors />
+        <CookieConsent />
       </body>
     </html>
   );

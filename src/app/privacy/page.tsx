@@ -36,16 +36,28 @@ export default function PrivacyPolicy() {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-xl font-bold text-zinc-900">3. 運営と費用について</h2>
+              <h2 className="text-xl font-bold text-zinc-900">3. 運営とデータ収集について</h2>
               <p>
                 本サービスは完全無料で提供されており、広告の掲載やユーザーデータの販売による収益化は一切行っておりません。
-                また、本サービスにおいてCookieによる追跡や情報の収集を行うこともありません。
-                サーバー代がかからないサーバーレス構成により、非営利での永続的な提供を目指しています。
+              </p>
+              <p>
+                ただし、ウェブサービスの提供にあたり、以下の最小限の情報が収集される場合があります：
+              </p>
+              <ul className="list-disc pl-5 space-y-2">
+                <li><strong>技術的ログ:</strong> ホスティングプラットフォーム（Vercel）の仕様により、アクセス時のIPアドレス、ブラウザ情報、アクセス日時などがサーバーログとして記録されます。これはサービスの運営とセキュリティ確保のために標準的に行われるものです。</li>
+                <li><strong>Cookieの使用:</strong> ユーザーの同意状態の管理（同意バナーの表示制御）や設定の保存のために、ブラウザのCookieやローカルストレージを使用する場合があります。これらは個人の追跡や広告目的には使用されません。</li>
+              </ul>
+            </section>
+
+            <section className="space-y-4">
+              <h2 className="text-xl font-bold text-zinc-900">4. 第三者サービス</h2>
+              <p>
+                本サービスはホスティングに Vercel を使用しています。Vercelによって収集される情報の取り扱いについては、Vercelのプライバシーポリシーをご確認ください。解析ツール等を使用する場合も、プライバシーを最大限尊重し、個人を特定しない形での利用に限定します。
               </p>
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-xl font-bold text-zinc-900">4. 免責事項</h2>
+              <h2 className="text-xl font-bold text-zinc-900">5. 免責事項</h2>
               <p>
                 本サービスは現状有姿で提供されます。画像処理の結果生じたいかなる損害についても、当方は責任を負いかねます。
                 重要なデータのバックアップは、ユーザーご自身の責任で行ってください。
