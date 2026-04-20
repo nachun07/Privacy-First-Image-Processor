@@ -8,7 +8,8 @@ import { processImageWithCanvas, ProcessingSettings } from '@/lib/image-processo
 import { Button } from '@/components/ui/button';
 import { 
   Download, Play, Trash2, ShieldCheck, Moon, Sun, 
-  BarChart3, ChevronLeft, ChevronRight 
+  BarChart3, ChevronLeft, ChevronRight, AlertTriangle,
+  ShieldAlert, Globe, Wrench, WifiOff, History, Activity
 } from 'lucide-react';
 import { toast } from 'sonner';
 import JSZip from 'jszip';
@@ -384,6 +385,101 @@ export default function Home() {
               <div>
                 <div className="font-black text-primary text-2xl mb-1">保護</div>
                 <p className="text-xs uppercase tracking-widest font-bold opacity-40 italic">Privacy First</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Advice & Cautions Section */}
+          <div className="mt-24 space-y-12">
+            <div className="flex items-center gap-4 mb-2">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent to-muted" />
+              <h2 className="text-2xl font-black tracking-tight px-4 whitespace-nowrap">本アプリの制約と注意事項</h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-transparent to-muted" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="p-8 bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-muted/60 shadow-sm hover:shadow-md transition-all duration-300 group">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="p-3 bg-amber-500/10 rounded-2xl group-hover:scale-110 transition-transform">
+                    <AlertTriangle className="w-6 h-6 text-amber-500" />
+                  </div>
+                  <h3 className="font-bold text-base leading-tight">真のローカル処理の保証</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed font-medium">
+                  見た目上はローカルで処理されていますが、裏で送信していないことを証明するのは難しく、完全な信頼は実装に依存します。
+                </p>
+              </div>
+
+              <div className="p-8 bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-muted/60 shadow-sm hover:shadow-md transition-all duration-300 group">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="p-3 bg-red-500/10 rounded-2xl group-hover:scale-110 transition-transform">
+                    <ShieldAlert className="w-6 h-6 text-red-500" />
+                  </div>
+                  <h3 className="font-bold text-base leading-tight">開発者依存のセキュリティ</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed font-medium">
+                  プラットフォーム（Vercel等）自体の安全性とは別に、アプリの実装次第で脆弱性が存在する可能性がある点にご留意ください。
+                </p>
+              </div>
+
+              <div className="p-8 bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-muted/60 shadow-sm hover:shadow-md transition-all duration-300 group">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="p-3 bg-blue-500/10 rounded-2xl group-hover:scale-110 transition-transform">
+                    <Globe className="w-6 h-6 text-blue-500" />
+                  </div>
+                  <h3 className="font-bold text-base leading-tight">アクセス情報の取得</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed font-medium">
+                  IPアドレスやブラウザ情報などは、通常のウェブ通信の一部としてログや分析ツールによって記録される可能性があります。
+                </p>
+              </div>
+
+              <div className="p-8 bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-muted/60 shadow-sm hover:shadow-md transition-all duration-300 group">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="p-3 bg-zinc-500/10 rounded-2xl group-hover:scale-110 transition-transform">
+                    <Wrench className="w-6 h-6 text-zinc-500" />
+                  </div>
+                  <h3 className="font-bold text-base leading-tight">機能の限定性</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed font-medium">
+                  簡易的な変換・最適化が目的です。Adobe Photoshopのような高度な画像編集や大規模なバッチ処理には不向きです。
+                </p>
+              </div>
+
+              <div className="p-8 bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-muted/60 shadow-sm hover:shadow-md transition-all duration-300 group">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="p-3 bg-orange-500/10 rounded-2xl group-hover:scale-110 transition-transform">
+                    <WifiOff className="w-6 h-6 text-orange-500" />
+                  </div>
+                  <h3 className="font-bold text-base leading-tight">ネットワークへの依存</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed font-medium">
+                  完全なオフライン対応ではありません。初回ロードや継続的な利用にはインターネット接続が必要になる場合があります。
+                </p>
+              </div>
+
+              <div className="p-8 bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-muted/60 shadow-sm hover:shadow-md transition-all duration-300 group">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="p-3 bg-indigo-500/10 rounded-2xl group-hover:scale-110 transition-transform">
+                    <History className="w-6 h-6 text-indigo-500" />
+                  </div>
+                  <h3 className="font-bold text-base leading-tight">サービス継続性の不安</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed font-medium">
+                  個人開発プロジェクトのため、予告なくサービスが終了したり、更新が停止したりするリスクがあることを承知おきください。
+                </p>
+              </div>
+
+              <div className="p-8 bg-white dark:bg-zinc-900 lg:col-span-3 rounded-[2.5rem] border border-muted/60 shadow-sm hover:shadow-md transition-all duration-300 group">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="p-3 bg-purple-500/10 rounded-2xl group-hover:scale-110 transition-transform">
+                    <Activity className="w-6 h-6 text-purple-500" />
+                  </div>
+                  <h3 className="font-bold text-base leading-tight">セキュリティ対策の限界</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed font-medium">
+                  セキュリティヘッダーの不足やライブラリの脆弱性など、セキュリティ対策が完全ではない可能性があります。
+                </p>
               </div>
             </div>
           </div>
