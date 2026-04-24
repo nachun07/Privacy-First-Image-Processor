@@ -9,12 +9,14 @@ import { Button } from '@/components/ui/button';
 import { 
   Download, Play, Trash2, ShieldCheck, Moon, Sun, 
   BarChart3, ChevronLeft, ChevronRight, AlertTriangle,
-  ShieldAlert, Globe, Wrench, WifiOff, History, Activity
+  ShieldAlert, Globe, Wrench, WifiOff, History, Activity,
+  Brush
 } from 'lucide-react';
 import { toast } from 'sonner';
 import JSZip from 'jszip';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { ManualEditor } from '@/components/image-processor/manual-editor';
 
 export default function Home() {
   const [images, setImages] = useState<ImageItem[]>([]);
@@ -43,6 +45,7 @@ export default function Home() {
   const [previewOriginalUrl, setPreviewOriginalUrl] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [editingImageId, setEditingImageId] = useState<string | null>(null);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -73,15 +76,21 @@ export default function Home() {
 
     const generatePreview = async () => {
       const firstImage = images[0];
-      if (!previewOriginalUrl) {
-        setPreviewOriginalUrl(URL.createObjectURL(firstImage.file));
-      }
+      
+      // 最初の一枚が変わった場合、プレビューURLを再生成
+      const newOriginalUrl = URL.createObjectURL(firstImage.file);
+      setPreviewOriginalUrl(prev => {
+        if (prev) URL.revokeObjectURL(prev);
+        return newOriginalUrl;
+      });
       
       try {
         const previewSettings = { ...settings, maxWidth: 800 }; 
-        const result = await processImageWithCanvas(firstImage.file, previewSettings, 0);
-        if (previewUrl) URL.revokeObjectURL(previewUrl);
-        setPreviewUrl(URL.createObjectURL(result));
+        const result = await processImageWithCanvas(firstImage.file, previewSettings, 0, firstImage.maskData, firstImage.mosaicLevel);
+        setPreviewUrl(prev => {
+          if (prev) URL.revokeObjectURL(prev);
+          return URL.createObjectURL(result);
+        });
       } catch (err) {
         console.error("Preview failed", err);
       }
@@ -93,7 +102,7 @@ export default function Home() {
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
-  }, [settings, images.length]);
+  }, [settings, images.length, images[0]?.id, images[0]?.maskData, images[0]?.mosaicLevel]);
 
   const updateSetting = (key: string, value: any) => {
     setSettings(prev => ({ ...prev, [key]: value }));
@@ -174,7 +183,7 @@ export default function Home() {
         setImages(prev => prev.map(item => 
           item.id === img.id ? { ...item, status: 'processing', progress: 50 } : item
         ));
-        const processed = await processImageWithCanvas(img.file, settings, i);
+        const processed = await processImageWithCanvas(img.file, settings, i, img.maskData, img.mosaicLevel);
         setImages(prev => prev.map(item => 
           item.id === img.id ? { ...item, status: 'completed', progress: 100, result: processed } : item
         ));
@@ -204,7 +213,16 @@ export default function Home() {
     URL.revokeObjectURL(url);
   };
 
+  const updateMask = (id: string, maskData: string, mosaicLevel: number) => {
+    setImages(prev => prev.map(img => 
+      img.id === id ? { ...img, maskData, mosaicLevel } : img
+    ));
+    toast.success('編集を保存しました');
+  };
+
   if (!isClient) return null;
+
+  const editingImage = images.find(img => img.id === editingImageId);
 
   return (
     <main className={`min-h-screen ${isDarkMode ? 'dark bg-zinc-950 text-zinc-100' : 'bg-[#fafafa] text-zinc-900'} transition-colors duration-300`}>
@@ -264,7 +282,18 @@ export default function Home() {
                   </div>
                 </div>
                 
-                <div className="relative aspect-video rounded-[2rem] overflow-hidden border-4 border-white dark:border-zinc-800 shadow-2xl shadow-primary/5 bg-muted/40">
+                {/* 最初の画像（プレビュー対象）が存在する場合、手書きモザイクボタンを表示 */}
+                <div className="flex justify-center -mt-2 mb-2 relative z-20">
+                  <Button 
+                    onClick={() => setEditingImageId(images[0].id)}
+                    className="h-12 px-8 rounded-full shadow-2xl shadow-primary/30 border-2 border-white/10 gap-3 font-black text-[15px] hover:scale-105 transition-transform"
+                  >
+                    <Brush className="w-5 h-5" />
+                    この画像に手書きモザイクを入れる
+                  </Button>
+                </div>
+
+                <div className="relative aspect-video rounded-[2rem] overflow-hidden border-4 border-white dark:border-zinc-800 shadow-2xl shadow-primary/5 bg-muted/40 group">
                   <img src={previewOriginalUrl || ''} className="absolute inset-0 w-full h-full object-contain" alt="加工前" />
                   <div className="absolute inset-0 w-full h-full overflow-hidden" style={{ clipPath: 'inset(0 0 0 var(--slider-pos, 50%))' }}>
                     <img src={previewUrl} className="absolute inset-0 w-full h-full object-contain" alt="加工後" />
@@ -302,7 +331,12 @@ export default function Home() {
                   </Button>
                 )}
               </div>
-              <ImageList images={images} onRemove={removeImage} renamePattern={settings.renamePattern} />
+              <ImageList 
+                images={images} 
+                onRemove={removeImage} 
+                onEdit={(id) => setEditingImageId(id)}
+                renamePattern={settings.renamePattern} 
+              />
             </section>
           </div>
 
@@ -507,6 +541,17 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Manual Editor Modal */}
+      <AnimatePresence>
+        {editingImage && (
+          <ManualEditor 
+            image={editingImage} 
+            onSave={updateMask} 
+            onClose={() => setEditingImageId(null)} 
+          />
+        )}
+      </AnimatePresence>
     </main>
   );
 }

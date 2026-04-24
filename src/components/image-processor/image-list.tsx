@@ -14,15 +14,18 @@ export interface ImageItem {
   status: 'pending' | 'processing' | 'completed' | 'error';
   progress: number;
   result?: File;
+  maskData?: string; // 手書きモザイク/ぼかし用のマスクデータ (Data URL)
+  mosaicLevel?: number; // モザイクの粗さ
 }
 
 interface ImageListProps {
   images: ImageItem[];
   onRemove: (id: string) => void;
+  onEdit: (id: string) => void;
   renamePattern?: string;
 }
 
-export const ImageList: React.FC<ImageListProps> = ({ images, onRemove, renamePattern = '{{filename}}' }) => {
+export const ImageList: React.FC<ImageListProps> = ({ images, onRemove, onEdit, renamePattern = '{{filename}}' }) => {
   const downloadSingle = (img: ImageItem) => {
     if (!img.result) return;
     const url = URL.createObjectURL(img.result);
@@ -71,16 +74,29 @@ export const ImageList: React.FC<ImageListProps> = ({ images, onRemove, renamePa
             >
               <div className="flex items-center gap-4">
                 {/* Preview */}
-                <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-muted flex-shrink-0 border border-zinc-100 dark:border-zinc-800">
+                <div className="relative group w-16 h-16 rounded-xl overflow-hidden bg-muted flex-shrink-0 border border-zinc-100 dark:border-zinc-800 ring-primary/10 hover:ring-4 transition-all">
                   <img
                     src={img.preview}
                     alt={`${img.file.name}のプレビュー`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
+                  {img.status === 'pending' && (
+                    <button 
+                      onClick={() => onEdit(img.id)}
+                      className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-opacity"
+                      aria-label="ペンで編集"
+                    >
+                      <FileEdit className="w-6 h-6 text-white" />
+                      <span className="text-[8px] font-black text-white mt-1 uppercase tracking-widest">Mosaic</span>
+                    </button>
+                  )}
                   {img.status === 'processing' && (
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center" aria-label="処理中">
                       <Loader2 className="w-7 h-7 text-white animate-spin" />
                     </div>
+                  )}
+                  {img.maskData && (
+                    <div className="absolute top-1 right-1 w-2.5 h-2.5 bg-primary rounded-full border-2 border-white shadow-sm" aria-label="編集済み" />
                   )}
                 </div>
 

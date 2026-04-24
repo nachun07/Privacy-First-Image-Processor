@@ -31,7 +31,9 @@ export interface ProcessingSettings {
 export const processImageWithCanvas = async (
   file: File,
   settings: ProcessingSettings,
-  index: number = 0
+  index: number = 0,
+  maskData?: string,
+  mosaicLevel?: number
 ): Promise<File> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -43,7 +45,6 @@ export const processImageWithCanvas = async (
         if (!ctx) return reject('Canvas context not available');
 
         // 1. Calculate Dimensions
-        // 1. Calculate Dimensions (Always resize to maxWidth if specified, or keep original)
         let targetWidth = img.width;
         let targetHeight = img.height;
 
@@ -102,7 +103,7 @@ export const processImageWithCanvas = async (
 
         ctx.save();
 
-        // [ENHANCED CORNER ROUNDING]
+        // Corner Rounding
         if (settings.cornerRadius > 0) {
           const minSide = Math.min(targetWidth, targetHeight);
           const radius = (minSide / 200) * settings.cornerRadius;
@@ -128,6 +129,40 @@ export const processImageWithCanvas = async (
         
         ctx.drawImage(img, dx, dy, targetWidth, targetHeight);
         ctx.restore();
+
+        // [NEW] 4.5 Apply Manual Mosaic Mask
+        if (maskData) {
+          const maskImg = new Image();
+          await new Promise((res) => {
+            maskImg.onload = res;
+            maskImg.src = maskData;
+          });
+
+          // Create Mosaic Image
+          const mosaicCanvas = document.createElement('canvas');
+          const mCtx = mosaicCanvas.getContext('2d')!;
+          const mLevel = mosaicLevel || 25; // デフォルトは25
+          const mScale = 1 / Math.max(1, mLevel); 
+          mosaicCanvas.width = Math.max(1, targetWidth * mScale);
+          mosaicCanvas.height = Math.max(1, targetHeight * mScale);
+          
+          mCtx.drawImage(img, 0, 0, mosaicCanvas.width, mosaicCanvas.height);
+          
+          const tempCanvas = document.createElement('canvas');
+          const tCtx = tempCanvas.getContext('2d')!;
+          tempCanvas.width = targetWidth;
+          tempCanvas.height = targetHeight;
+          
+          tCtx.imageSmoothingEnabled = false;
+          tCtx.drawImage(mosaicCanvas, 0, 0, targetWidth, targetHeight);
+          
+          // Use Mask
+          tCtx.globalCompositeOperation = 'destination-in';
+          tCtx.drawImage(maskImg, 0, 0, targetWidth, targetHeight);
+          
+          // Draw to Main
+          ctx.drawImage(tempCanvas, dx, dy, targetWidth, targetHeight);
+        }
 
         // 5. Watermark / Logo Synthesis
         const drawWatermark = async () => {
@@ -183,7 +218,7 @@ export const processImageWithCanvas = async (
 
         await drawWatermark();
 
-        // 6. Export with Naming Logic
+        // 6. Export
         canvas.toBlob((blob) => {
           if (blob) {
             const format = settings.format || 'image/webp';
